@@ -1,10 +1,11 @@
-#!name=YouTube Premium
+#!name=YouTube Premium Plus
 #!desc=Youtube Ad Full blocker with PIP player
 #!arguments=blockUpload:true,blockImmersive:true,captionLang:zh-Hans,lyricLang:zh-Hans,scriptExecutionEngine:auto,debug:false
 # Origin Author: @DivineEngine, @app2smile, @Maasea, @VirgilClyne
 # Other hints: @Choler, @bai1zi
 # Merged and released by @ddgksf2013 in form of qx
 # Translated and refined for shadowrocket by @deezertidal
+# 20241201
 
 [Rule]
 AND,((DOMAIN-SUFFIX,googlevideo.com), (PROTOCOL,UDP)),REJECT
