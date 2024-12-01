@@ -3121,61 +3121,36 @@
             addTranslateCaption() {
                 let e = this.argument.captionLang;
                 e !== "off" && this.iterate(this.message, "captionTracks", (n, r) => {
-                    let s = n.captionTracks,
-                        o = n.audioTracks;
+                    let s = n.captionTracks, o = n.audioTracks;
                     if (Array.isArray(s)) {
-                        let a = {
-                                [e]: 2,
-                                en: 1
-                            },
-                            c = -1,
-                            d = 0;
+                        let c = -1, d = 0;
+                        // 遍历字幕轨道，标记字幕为可用，并且不进行翻译
                         for (let f = 0; f < s.length; f++) {
-                            let l = s[f],
-                                g = a[l.languageCode];
-                            g && g > c && (c = g, d = f), l.isTranslatable = !0
+                            let l = s[f];
+                            l.isTranslatable = !1; // 不进行翻译
+                            c = f; // 默认选择第一个字幕轨道
                         }
-                        if (c !== 2) {
-                            let f = new Ge({
-                                baseUrl: s[d].baseUrl + `&tlang=${e}`,
-                                name: {
-                                    runs: [{
-                                        text: `@Enhance (${e})`
-                                    }]
-                                },
-                                vssId: `.${e}`,
-                                languageCode: e
-                            });
-                            s.push(f)
+                        // 自动启用字幕（即设置字幕为默认轨道）
+                        if (c !== -1) {
+                            let f = s[c];
+                            f.isDefault = true; // 设置为默认字幕
                         }
+                        // 更新音频轨道的字幕索引
                         if (Array.isArray(o)) {
-                            let f = c === 2 ? d : s.length - 1;
-                            for (let l of o) l.captionTrackIndices?.includes(f) || l.captionTrackIndices.push(f), l.defaultCaptionTrackIndex = f, l.captionsInitialState = 3
+                            let f = c !== -1 ? c : s.length - 1;
+                            for (let l of o) {
+                                l.captionTrackIndices?.includes(f) || l.captionTrackIndices.push(f);
+                                l.defaultCaptionTrackIndex = f;
+                                l.captionsInitialState = 3; // 设置字幕的初始状态为已启用
+                            }
                         }
                     }
-                    let i = {
-                        de: "Deutsch",
-                        ru: "\u0420\u0443\u0441\u0441\u043A\u0438\u0439",
-                        fr: "Fran\xE7ais",
-                        fil: "Filipino",
-                        ko: "\uD55C\uAD6D\uC5B4",
-                        ja: "\u65E5\u672C\u8A9E",
-                        en: "English",
-                        vi: "Ti\u1EBFng Vi\u1EC7t",
-                        "zh-Hant": "\u4E2D\u6587\uFF08\u7E41\u9AD4\uFF09",
-                        "zh-Hans": "\u4E2D\u6587\uFF08\u7B80\u4F53\uFF09",
-                        und: "@VirgilClyne"
-                    };
-                    n.translationLanguages = Object.entries(i).map(([a, c]) => new Ye({
-                        languageCode: a,
-                        languageName: {
-                            runs: [{
-                                text: c
-                            }]
-                        }
-                    })), r.length = 0
-                })
+                    // 清空翻译语言列表
+                    n.translationLanguages = [];
+                    r.length = 0;
+                });
             }
+            
         },
         Ie = class extends K {
             constructor(e = Ct, n = "Search") {
