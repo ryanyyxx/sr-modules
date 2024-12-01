@@ -3119,8 +3119,7 @@
                 }))
             }
             addTranslateCaption() {
-                let e = this.argument.captionLang;
-                e !== "off" && this.iterate(this.message, "captionTracks", (n, r) => {
+                this.iterate(this.message, "captionTracks", (n, r) => {
                     let s = n.captionTracks, o = n.audioTracks;
                     if (Array.isArray(s)) {
                         let c = -1, d = 0;
@@ -3150,6 +3149,7 @@
                     r.length = 0;
                 });
             }
+            
             
         },
         Ie = class extends K {
