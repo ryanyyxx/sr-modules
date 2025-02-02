@@ -2921,7 +2921,7 @@
         decodeArgument() {
             let e = {
                 lyricLang: "zh-Hans",
-                captionLang: "en",
+                captionLang: "off",
                 blockUpload: !0,
                 blockImmersive: !0,
                 debug: !1
