@@ -194,7 +194,7 @@
             try {
                 r = JSON.parse(e)
             } catch (s) {
-                throw new Error(`cannot decode ${this.getType().typeName} from JSON: ${s instanceof Error ? s.message : String(s)}`)
+                throw new Error(`cannot decode ${this.getType().typeName} from JSON: ${s instanceof Error?s.message:String(s)}`)
             }
             return this.fromJson(r, n)
         }
@@ -1089,7 +1089,7 @@
                     case "=":
                         s = 0;
                     case `
-    `:
+`:
                     case "\r":
                     case "	":
                     case " ":
@@ -2920,8 +2920,8 @@
         }
         decodeArgument() {
             let e = {
-                lyricLang: "off",
-                captionLang: "off",
+                lyricLang: "zh-Hans",
+                captionLang: "en",
                 blockUpload: !0,
                 blockImmersive: !0,
                 debug: !1
@@ -2929,7 +2929,7 @@
             return y.decodeParams(e)
         }
         fromBinary(e) {
-            return e instanceof Uint8Array ? (this.message = this.msgType.fromBinary(e), y.debug(`raw: ${Math.floor(e.length / 1024)} kb`), this) : (y.log("YouTube can not get binaryBody"), y.exit(), this)
+            return e instanceof Uint8Array ? (this.message = this.msgType.fromBinary(e), y.debug(`raw: ${Math.floor(e.length/1024)} kb`), this) : (y.log("YouTube can not get binaryBody"), y.exit(), this)
         }
         async modify() {
             let e = this.pure();
@@ -2958,7 +2958,7 @@
             if (this.save(), this.needProcess) {
                 y.timeStart("toBinary");
                 let e = this.toBinary();
-                y.timeEnd("toBinary"), y.debug(`modify: ${Math.floor(e.length / 1024)} kb`), y.done({
+                y.timeEnd("toBinary"), y.debug(`modify: ${Math.floor(e.length/1024)} kb`), y.done({
                     bodyBytes: e
                 })
             }
@@ -3064,7 +3064,7 @@
                     r, s = !1;
                 if (this.iterate(this.message, "timedLyricsContent", (c, d) => {
                         r = c.timedLyricsContent, n = c.timedLyricsContent.runs.map(f => f.text).join(`
-    `), s = !0, d.length = 0
+`), s = !0, d.length = 0
                     }), s || this.iterate(this.message, "description", (c, d) => {
                         r = c.description.runs[0], n = c.description.runs[0].text, d.length = 0, s = !0
                     }), !s) return;
@@ -3079,11 +3079,11 @@
                         d = " & Translated by Google",
                         f = c[2].includes(o);
                     r.text ? (r.text = c[0].map(l => f ? l[0] : l[1] + l[0] || "").join(`\r
-    `), this.iterate(this.message, "footer", (l, g) => {
+`), this.iterate(this.message, "footer", (l, g) => {
                         l.footer.runs[0].text += d, g.length = 0
                     })) : r.runs.length <= c[0].length && (r.runs.forEach((l, g) => {
                         l.text = f ? c[0][g][0] : l.text + `
-    ${c[0][g][0]}`
+${c[0][g][0]}`
                     }), r.footerLabel += d), this.needProcess = !0
                 }
             }
@@ -3119,38 +3119,63 @@
                 }))
             }
             addTranslateCaption() {
-                this.iterate(this.message, "captionTracks", (n, r) => {
-                    let s = n.captionTracks, o = n.audioTracks;
+                let e = this.argument.captionLang;
+                e !== "off" && this.iterate(this.message, "captionTracks", (n, r) => {
+                    let s = n.captionTracks,
+                        o = n.audioTracks;
                     if (Array.isArray(s)) {
-                        let c = -1, d = 0;
-                        // 遍历字幕轨道，标记字幕为可用，并且不进行翻译
+                        let a = {
+                                [e]: 2,
+                                en: 1
+                            },
+                            c = -1,
+                            d = 0;
                         for (let f = 0; f < s.length; f++) {
-                            let l = s[f];
-                            l.isTranslatable = !1; // 不进行翻译
-                            c = f; // 默认选择第一个字幕轨道
+                            let l = s[f],
+                                g = a[l.languageCode];
+                            g && g > c && (c = g, d = f), l.isTranslatable = !0
                         }
-                        // 自动启用字幕（即设置字幕为默认轨道）
-                        if (c !== -1) {
-                            let f = s[c];
-                            f.isDefault = true; // 设置为默认字幕
+                        if (c !== 2) {
+                            let f = new Ge({
+                                baseUrl: s[d].baseUrl + `&tlang=${e}`,
+                                name: {
+                                    runs: [{
+                                        text: `@Enhance (${e})`
+                                    }]
+                                },
+                                vssId: `.${e}`,
+                                languageCode: e
+                            });
+                            s.push(f)
                         }
-                        // 更新音频轨道的字幕索引
                         if (Array.isArray(o)) {
-                            let f = c !== -1 ? c : s.length - 1;
-                            for (let l of o) {
-                                l.captionTrackIndices?.includes(f) || l.captionTrackIndices.push(f);
-                                l.defaultCaptionTrackIndex = f;
-                                l.captionsInitialState = 3; // 设置字幕的初始状态为已启用
-                            }
+                            let f = c === 2 ? d : s.length - 1;
+                            for (let l of o) l.captionTrackIndices?.includes(f) || l.captionTrackIndices.push(f), l.defaultCaptionTrackIndex = f, l.captionsInitialState = 3
                         }
                     }
-                    // 清空翻译语言列表
-                    n.translationLanguages = [];
-                    r.length = 0;
-                });
+                    let i = {
+                        de: "Deutsch",
+                        ru: "\u0420\u0443\u0441\u0441\u043A\u0438\u0439",
+                        fr: "Fran\xE7ais",
+                        fil: "Filipino",
+                        ko: "\uD55C\uAD6D\uC5B4",
+                        ja: "\u65E5\u672C\u8A9E",
+                        en: "English",
+                        vi: "Ti\u1EBFng Vi\u1EC7t",
+                        "zh-Hant": "\u4E2D\u6587\uFF08\u7E41\u9AD4\uFF09",
+                        "zh-Hans": "\u4E2D\u6587\uFF08\u7B80\u4F53\uFF09",
+                        und: "@VirgilClyne"
+                    };
+                    n.translationLanguages = Object.entries(i).map(([a, c]) => new Ye({
+                        languageCode: a,
+                        languageName: {
+                            runs: [{
+                                text: c
+                            }]
+                        }
+                    })), r.length = 0
+                })
             }
-            
-            
         },
         Ie = class extends K {
             constructor(e = Ct, n = "Search") {
